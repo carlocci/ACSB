@@ -1,0 +1,23 @@
+<!doctype html>
+<head>
+  <meta http-equiv="Content-type" content="text/html;charset=utf-8">
+  <title>Autocomplete</title>
+  <style>
+    div {
+      background-color: red;
+      border: 3px solid #66e;
+    }
+  </style>
+  <script type="text/javascript" src="autocomplete.js"></script>
+</head>
+<body>
+  <form>
+    <input type="text" name="raw" size="100">
+  </form>
+  <div>
+    placeholder text here
+  </div>
+  <script type="text/javascript">
+    new Autocomplete(document.forms[0].elements[1], {});
+  </script>
+
