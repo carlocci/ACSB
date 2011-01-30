@@ -1,0 +1,2 @@
+disable fetching when no print keys are pressed (check value before and after)
+mouse support

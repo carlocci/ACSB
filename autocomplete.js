@@ -69,7 +69,9 @@ function Autocomplete(input, options) { var suggestBox, timeout
     if (dataList.length == 0) suggestBox.style.display = 'none';
     else {suggestBox.style.display = 'block'}}
 
-  input.onkeypress = function(e) {
+  input.onkeyup = function(e) {
+    // TODO Filter out non ascii keys to limit http requests e.charCode == 0 e.which?
+    if (e.keyCode == 38 || e.keyCode == 40 || e.keyCode == 13) return false
     if (timeout)  window.clearTimeout(timeout)
     if (this.value.length >= options.minChars) 
                   timeout = setTimeout(function(){loadData(input.value)}
@@ -79,13 +81,23 @@ function Autocomplete(input, options) { var suggestBox, timeout
     e = e || window.event
     if (suggestBox.style.display == 'block') {
       sel = suggestBox.getElementsByClassName('hover')[0]
-      if (!sel) suggestBox.childNodes[0].className += ' hover'
+      if (!sel) {
+        if (e.keyCode == 40) suggestBox.firstChild.className += ' hover'
+        if (e.keyCode == 38) suggestBox.lastChild.className += ' hover'}
+      // If some suggestion is selected:
       else {
-        sel.className.replace('hover', '')
-        if (e.keyCode == 40 && sel.nextSibling)
-          sel.nextSibling.className += ' hover'
-        if (e.keyCode == 38 && sel.previousSibling)
-          sel.previousSibling.className += ' hover'}}}
+        sel.className = sel.className.replace('hover', '')
+        if (e.keyCode == 40)
+          if (sel.nextSibling) sel.nextSibling.className += ' hover'
+          else suggestBox.firstChild.className += ' hover'
+        if (e.keyCode == 38)
+          if (sel.previousSibling) sel.previousSibling.className += ' hover'
+          else suggestBox.lastChild.className +=' hover'
+        if (e.keyCode == 13) {
+          input.value = input.value.replace(/(, )?[^, ]*$/, '$1'+sel.textContent+', ')
+          suggestBox.style.display = 'none'}
+        // TODO should return false only for special keys the app uses (up, down, esc)
+        return false}}}
 
 
   options = extend(defaultOptions, options)
