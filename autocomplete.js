@@ -29,16 +29,15 @@ function XHRGet(url, cb) { var req
       }
       else throw new Error('Couldn\'t fetch the data from the server')}}}
 
-function Autocomplete(input, options) { var suggestBox, timeout
+function Autocomplete(input, options) { var suggestBox, timeout, inputValue
 
-  function loadData(text) { var last
-    last = text.split(options.fieldSeparator).pop()
+  function loadData(string) {
     if (typeof options.data == "object") {
       // Fetch data from the provided object
-      updateSuggestBox(filterDataSet(options.data, last))}
+      updateSuggestBox(filterDataSet(options.data, string))}
     else if (typeof options.data == "string")
       // Fetch data from an xhr
-      XHRGet(options.data + '?q=' + encodeURIComponent(last)
+      XHRGet(options.data + '?q=' + encodeURIComponent(string)
             ,function(e) {updateSuggestBox(JSON.parse(e.responseText))})}
 
   function filterDataSet(dataDict, value) {var p, hasOwnProp, ret
@@ -55,27 +54,29 @@ function Autocomplete(input, options) { var suggestBox, timeout
     return ret} 
 
   function updateSuggestBox(dataList) { var i, l, fragment, div, p
-    fragment = document.createDocumentFragment()
-    for (i = 0, l = dataList.length; i < l; ++i) {
-      div = document.createElement('div')
-      div.className = 'acsb-element'
-      p = document.createElement('p')
-      p.className = 'acsb-p'
-      p.appendChild(document.createTextNode(dataList[i]))
-      div.appendChild(p)
-      fragment.appendChild(div)}
     suggestBox.innerHTML = ''
-    suggestBox.appendChild(fragment)
-    if (dataList.length == 0) suggestBox.style.display = 'none';
-    else {suggestBox.style.display = 'block'}}
+    suggestBox.style.display = 'none';
+    if (dataList.length > 0) {
+      fragment = document.createDocumentFragment()
+      for (i = 0, l = dataList.length; i < l; ++i) {
+        div = document.createElement('div')
+        div.className = 'acsb-element'
+        p = document.createElement('p')
+        p.className = 'acsb-p'
+        p.appendChild(document.createTextNode(dataList[i]))
+        div.appendChild(p)
+        fragment.appendChild(div)}
+      suggestBox.appendChild(fragment)
+      suggestBox.style.display = 'block'}}
 
-  input.onkeyup = function(e) {
-    // TODO Filter out non ascii keys to limit http requests e.charCode == 0 e.which?
-    if (e.keyCode == 38 || e.keyCode == 40 || e.keyCode == 13) return false
-    if (timeout)  window.clearTimeout(timeout)
-    if (this.value.length >= options.minChars) 
-                  timeout = setTimeout(function(){loadData(input.value)}
-                                      ,options.updateTimeout)}
+  input.onkeyup = function(e) {var last
+    if (input.value == inputValue) return false
+    inputValue = input.value
+    last = inputValue.split(options.fieldSeparator).pop()
+    if (timeout) window.clearTimeout(timeout)
+    if (last.length >= options.minChars) 
+                 timeout = setTimeout(function(){loadData(last)}
+                                     ,options.updateTimeout)}
 
   input.onkeydown = function(e) {var sel
     e = e || window.event
@@ -110,6 +111,11 @@ function Autocomplete(input, options) { var suggestBox, timeout
   suggestBox.style.left = pos.x + 'px'
   suggestBox.style.width = input.offsetWidth + 'px'
   document.body.appendChild(suggestBox)
+
+  // IE
+  input.autocomplete = 'off'
+  // Other browsers
+  input.setAttribute('autocomplete', 'off')
 
 }
 

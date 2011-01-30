@@ -1,4 +1,4 @@
-disable fetching when no print keys are pressed (check value before and after)
+DONE disable fetching when no print keys are pressed (check value before and after)
+DONE bug: Check length on the last element before querying, not the whole input.value
 mouse support
 paste support
-bug: Check length on the last element before querying, not the whole input.value
