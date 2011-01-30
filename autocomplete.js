@@ -12,8 +12,8 @@ function extend() { var hasOwnProp, p, i, l, r
 function getPos(el) { var x, y
   x = 0, y = 0
   do {
-    x += el.offsetX
-    y += el.offsetY}
+    x += el.offsetLeft
+    y += el.offsetTop}
   while (el = el.offsetParent)
   return {x: x, y: y}}
 
@@ -39,7 +39,7 @@ function Autocomplete(input, options) { var suggestBox, timeout
     else if (typeof options.data == "string")
       // Fetch data from an xhr
       XHRGet(options.data + '?q=' + encodeURIComponent(last)
-            , function(e) {updateSuggestBox(JSON.parse(e.responseText))})}
+            ,function(e) {updateSuggestBox(JSON.parse(e.responseText))})}
 
   function filterDataSet(dataDict, value) {var p, hasOwnProp, ret
     hasOwnProp = Object.prototype.hasOwnProperty
@@ -66,24 +66,38 @@ function Autocomplete(input, options) { var suggestBox, timeout
       fragment.appendChild(div)}
     suggestBox.innerHTML = ''
     suggestBox.appendChild(fragment)
-    if (suggestBox.style.diplay == 'none') suggestBox.style.display = 'block'}
-    
-  input.onkeyup = function(e) {
+    if (dataList.length == 0) suggestBox.style.display = 'none';
+    else {suggestBox.style.display = 'block'}}
+
+  input.onkeypress = function(e) {
     if (timeout)  window.clearTimeout(timeout)
     if (this.value.length >= options.minChars) 
                   timeout = setTimeout(function(){loadData(input.value)}
                                       ,options.updateTimeout)}
 
+  input.onkeydown = function(e) {var sel
+    e = e || window.event
+    if (suggestBox.style.display == 'block') {
+      sel = suggestBox.getElementsByClassName('hover')[0]
+      if (!sel) suggestBox.childNodes[0].className += ' hover'
+      else {
+        sel.className.replace('hover', '')
+        if (e.keyCode == 40 && sel.nextSibling)
+          sel.nextSibling.className += ' hover'
+        if (e.keyCode == 38 && sel.previousSibling)
+          sel.previousSibling.className += ' hover'}}}
+
+
   options = extend(defaultOptions, options)
   suggestBox = document.createElement('div')
   suggestBox.className = 'acsb'
-  suggestBox.style.display = 'block'
+  suggestBox.style.display = 'none'
   suggestBox.style.position = 'absolute'
   var pos = getPos(input)
   suggestBox.style.top = pos.y + input.offsetHeight + 'px'
   suggestBox.style.left = pos.x + 'px'
+  suggestBox.style.width = input.offsetWidth + 'px'
   document.body.appendChild(suggestBox)
-  this.position = getPos(input)
 
 }
 
