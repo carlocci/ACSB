@@ -96,9 +96,10 @@ function Autocomplete(input, options) { var suggestBox, timeout, inputValue
           else suggestBox.lastChild.className +=' hover'
         if (e.keyCode == 13) {
           input.value = input.value.replace(/(, )?[^, ]*$/, '$1'+sel.textContent+', ')
-          suggestBox.style.display = 'none'}
+          suggestBox.style.display = 'none'
+          return false}
         // TODO should return false only for special keys the app uses (up, down, esc)
-        return false}}}
+        }}}
 
 
   options = extend(defaultOptions, options)
