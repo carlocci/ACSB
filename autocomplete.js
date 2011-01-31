@@ -45,7 +45,7 @@ function Autocomplete(input, options) { var suggestBox, timeout, inputValue
     ret = []
     if (isNaN(Number(value))) {
       for (p in dataDict)
-        if (hasOwnProp.call(dataDict, p) && dataDict[p].indexOf(value) == 0)
+        if (hasOwnProp.call(dataDict, p) && dataDict[p].toLowerCase().indexOf(value.toLowerCase()) == 0)
           ret.push(dataDict[p])}
     else {
       for (p in dataDict)
