@@ -20,28 +20,31 @@ function getPos(el) { var x, y
 function XHRGet(url, parameters, cb) { var p, req, hasOwnProp
   hasOwnProp = Object.prototype.hasOwnProperty
   if (window.XMLHttpRequest) req = new XMLHttpRequest()
-  else if (window.ActiveXObject) req = new ActiveXObject('Microsoft.XMLHTTP')
+  else if (window.ActiveXObject) {req = new ActiveXObject('Microsoft.XMLHTTP')}
   else alert('This browser does not support Ajax')
   url += '?'
   for (p in parameters) 
     if (hasOwnProp.call(parameters, p))
-      url += encodeURIComponent(p) + '=' encodeURIComponent(parameters[p]) + '&'
+      url += encodeURIComponent(p) + '=' + encodeURIComponent(parameters[p]) + '&'
+  url = url.substring(0, url.length-1)
   req.open('GET', url, true)
   req.onreadystatechange = function(e) {
     if (req.readyState == 4) {
       if (req.status == 200) {
         cb(req)
       }
-      else throw new Error('Couldn\'t fetch the data from the server')}}}
+      else throw new Error('Couldn\'t fetch the data from the server')}}
+  req.send()}
 
 function Autocomplete(input, options) { var suggestBox, timeout, inputValue, that
 
   function loadData(string) {
-    if (typeof options.data == "string")
+    if (typeof options.queryURL == "string")
       // Fetch data from an xhr
       XHRGet(options.queryURL
-            ,extend(options.queryParameters, {'q': string})
-            ,function(e) {updateSuggestBox(JSON.parse(e.responseText))})
+            ,extend(options.queryParameters, {'value': string})
+            ,function(e) {try {updateSuggestBox(JSON.parse(e.responseText))}
+                          catch (error) {alert('Il server ha risposto in modo inaspettato\n' + e.responseText)}})
     else if (typeof options.data == "object")
       // Fetch data from the provided object
       updateSuggestBox(filterDataSet(options.data, string))}
@@ -59,19 +62,21 @@ function Autocomplete(input, options) { var suggestBox, timeout, inputValue, tha
           ret[p] = dataDict[p]}
     return ret} 
 
-  function updateSuggestBox(dataDict) { var i, fragment, div, p
+  function updateSuggestBox(dataDict) { var i, fragment, div, p, hasOwnProp
+    hasOwnProp = Object.prototype.hasOwnProperty
     suggestBox.innerHTML = ''
     suggestBox.style.display = 'none';
     fragment = document.createDocumentFragment()
-    for (i in dataDict) {
-      div = document.createElement('div')
-      div.className = 'acsb-element'
-      div.id = i
-      p = document.createElement('p')
-      p.className = 'acsb-p'
-      p.appendChild(document.createTextNode(dataDict[i]))
-      div.appendChild(p)
-      fragment.appendChild(div)}
+    for (i in dataDict)
+      if (hasOwnProp.call(dataDict, i)) {
+        div = document.createElement('div')
+        div.className = 'acsb-element'
+        div.id = i
+        p = document.createElement('p')
+        p.className = 'acsb-p'
+        p.appendChild(document.createTextNode(dataDict[i]))
+        div.appendChild(p)
+        fragment.appendChild(div)}
     suggestBox.appendChild(fragment)
     suggestBox.style.display = 'block'}
 
@@ -135,7 +140,7 @@ window.Autocomplete = Autocomplete
 
 // DEFAULTS
 defaultOptions = {minChars: 3
-                 ,updateTimeout: 50
+                 ,updateTimeout: 100
                  ,fieldSeparator: ", "
                  ,data: {}
                  ,queryURL: undefined
