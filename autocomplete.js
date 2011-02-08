@@ -17,14 +17,15 @@ function getPos(el) { var x, y
   while (el = el.offsetParent)
   return {x: x, y: y}}
 
-function XHRGet(url, parameters, cb) { var p, req
+function XHRGet(url, parameters, cb) { var p, req, hasOwnProp
+  hasOwnProp = Object.prototype.hasOwnProperty
   if (window.XMLHttpRequest) req = new XMLHttpRequest()
   else if (window.ActiveXObject) req = new ActiveXObject('Microsoft.XMLHTTP')
   else alert('This browser does not support Ajax')
   url += '?'
   for (p in parameters) 
-    if (parameters.hasOwnProperty(p)) {
-      url += encodeURIComponent(p) + '=' encodeURIComponent(parameters[p]) + '&'}
+    if (hasOwnProp.call(parameters, p))
+      url += encodeURIComponent(p) + '=' encodeURIComponent(parameters[p]) + '&'
   req.open('GET', url, true)
   req.onreadystatechange = function(e) {
     if (req.readyState == 4) {
@@ -47,32 +48,32 @@ function Autocomplete(input, options) { var suggestBox, timeout, inputValue, tha
 
   function filterDataSet(dataDict, value) {var p, hasOwnProp, ret
     hasOwnProp = Object.prototype.hasOwnProperty
-    ret = []
+    ret = {}
     if (isNaN(Number(value))) {
       for (p in dataDict)
         if (hasOwnProp.call(dataDict, p) && dataDict[p].toLowerCase().indexOf(value.toLowerCase()) == 0)
-          ret.push(dataDict[p])}
+          ret[p] = dataDict[p]}
     else {
       for (p in dataDict)
         if (hasOwnProp.call(dataDict, p) && p.indexOf(value) == 0)
-          ret.push(dataDict[p])}
+          ret[p] = dataDict[p]}
     return ret} 
 
-  function updateSuggestBox(dataList) { var i, l, fragment, div, p
+  function updateSuggestBox(dataDict) { var i, fragment, div, p
     suggestBox.innerHTML = ''
     suggestBox.style.display = 'none';
-    if (dataList.length > 0) {
-      fragment = document.createDocumentFragment()
-      for (i = 0, l = dataList.length; i < l; ++i) {
-        div = document.createElement('div')
-        div.className = 'acsb-element'
-        p = document.createElement('p')
-        p.className = 'acsb-p'
-        p.appendChild(document.createTextNode(dataList[i]))
-        div.appendChild(p)
-        fragment.appendChild(div)}
-      suggestBox.appendChild(fragment)
-      suggestBox.style.display = 'block'}}
+    fragment = document.createDocumentFragment()
+    for (i in dataDict) {
+      div = document.createElement('div')
+      div.className = 'acsb-element'
+      div.id = i
+      p = document.createElement('p')
+      p.className = 'acsb-p'
+      p.appendChild(document.createTextNode(dataDict[i]))
+      div.appendChild(p)
+      fragment.appendChild(div)}
+    suggestBox.appendChild(fragment)
+    suggestBox.style.display = 'block'}
 
   input.onkeyup = function(e) {var last
     if (input.value == inputValue) return false
@@ -103,8 +104,9 @@ function Autocomplete(input, options) { var suggestBox, timeout, inputValue, tha
           value = sel.textContent || sel.innerText
           if (typeof options.onPick == 'function')
           options.onPick.call(that, {'type': 'pick'
-                                    ,'element': input
-                                    ,'picked': value
+                                    ,'input': input
+                                    ,'target': sel
+                                    ,'value': value
                                     ,'suggestBox': suggestBox})
           return false}
         // TODO should return false only for special keys the app uses (up, down, esc)
@@ -139,7 +141,7 @@ defaultOptions = {minChars: 3
                  ,queryURL: undefined
                  ,queryParameters: undefined
                  ,onPick: function(e) {
-                    e.element.value = e.element.value.replace(/(, )?[^, ]*$/, '$1' + e.picked + ', ')
+                    e.input.value = e.input.value.replace(/(, )?[^, ]*$/, '$1' + e.value + ', ')
                     e.suggestBox.style.display = 'none'}
                  }
 })(this)
