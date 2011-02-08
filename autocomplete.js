@@ -17,10 +17,14 @@ function getPos(el) { var x, y
   while (el = el.offsetParent)
   return {x: x, y: y}}
 
-function XHRGet(url, cb) { var req
+function XHRGet(url, parameters, cb) { var p, req
   if (window.XMLHttpRequest) req = new XMLHttpRequest()
   else if (window.ActiveXObject) req = new ActiveXObject('Microsoft.XMLHTTP')
   else alert('This browser does not support Ajax')
+  url += '?'
+  for (p in parameters) 
+    if (parameters.hasOwnProperty(p)) {
+      url += encodeURIComponent(p) + '=' encodeURIComponent(parameters[p]) + '&'}
   req.open('GET', url, true)
   req.onreadystatechange = function(e) {
     if (req.readyState == 4) {
@@ -32,13 +36,14 @@ function XHRGet(url, cb) { var req
 function Autocomplete(input, options) { var suggestBox, timeout, inputValue
 
   function loadData(string) {
-    if (typeof options.data == "object") {
+    if (typeof options.data == "string")
+      // Fetch data from an xhr
+      XHRGet(options.queryURL
+            ,extend(options.queryParameters, {'q': string})
+            ,function(e) {updateSuggestBox(JSON.parse(e.responseText))})
+    else if (typeof options.data == "object")
       // Fetch data from the provided object
       updateSuggestBox(filterDataSet(options.data, string))}
-    else if (typeof options.data == "string")
-      // Fetch data from an xhr
-      XHRGet(options.data + '?q=' + encodeURIComponent(string)
-            ,function(e) {updateSuggestBox(JSON.parse(e.responseText))})}
 
   function filterDataSet(dataDict, value) {var p, hasOwnProp, ret
     hasOwnProp = Object.prototype.hasOwnProperty
@@ -117,7 +122,6 @@ function Autocomplete(input, options) { var suggestBox, timeout, inputValue
   input.autocomplete = 'off'
   // Other browsers
   input.setAttribute('autocomplete', 'off')
-
 }
 
 // EXPORTS
@@ -128,6 +132,8 @@ defaultOptions = {minChars: 3
                  ,updateTimeout: 50
                  ,fieldSeparator: ", "
                  ,data: {}
+                 ,queryURL: undefined
+                 ,queryParameters: undefined
                  }
 
 
