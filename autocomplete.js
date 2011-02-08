@@ -33,7 +33,7 @@ function XHRGet(url, parameters, cb) { var p, req
       }
       else throw new Error('Couldn\'t fetch the data from the server')}}}
 
-function Autocomplete(input, options) { var suggestBox, timeout, inputValue
+function Autocomplete(input, options) { var suggestBox, timeout, inputValue, that
 
   function loadData(string) {
     if (typeof options.data == "string")
@@ -83,7 +83,7 @@ function Autocomplete(input, options) { var suggestBox, timeout, inputValue
                  timeout = setTimeout(function(){loadData(last)}
                                      ,options.updateTimeout)}
 
-  input.onkeydown = function(e) {var sel
+  input.onkeydown = function(e) {var sel, value
     e = e || window.event
     if (suggestBox.style.display == 'block') {
       sel = suggestBox.getElementsByClassName('hover')[0]
@@ -100,13 +100,17 @@ function Autocomplete(input, options) { var suggestBox, timeout, inputValue
           if (sel.previousSibling) sel.previousSibling.className += ' hover'
           else suggestBox.lastChild.className +=' hover'
         if (e.keyCode == 13) {
-          input.value = input.value.replace(/(, )?[^, ]*$/, '$1'+sel.textContent+', ')
-          suggestBox.style.display = 'none'
+          value = sel.textContent || sel.innerText
+          if (typeof options.onPick == 'function')
+          options.onPick.call(that, {'type': 'pick'
+                                    ,'element': input
+                                    ,'picked': value
+                                    ,'suggestBox': suggestBox})
           return false}
         // TODO should return false only for special keys the app uses (up, down, esc)
         }}}
 
-
+  that = this
   options = extend(defaultOptions, options)
   suggestBox = document.createElement('div')
   suggestBox.className = 'acsb'
@@ -134,7 +138,8 @@ defaultOptions = {minChars: 3
                  ,data: {}
                  ,queryURL: undefined
                  ,queryParameters: undefined
+                 ,onPick: function(e) {
+                    e.element.value = e.element.value.replace(/(, )?[^, ]*$/, '$1' + e.picked + ', ')
+                    e.suggestBox.style.display = 'none'}
                  }
-
-
 })(this)
