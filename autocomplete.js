@@ -108,11 +108,11 @@ function Autocomplete(input, options) { var suggestBox, timeout, inputValue, tha
         if (e.keyCode == 13) {
           value = sel.textContent || sel.innerText
           if (typeof options.onPick == 'function')
-          options.onPick.call(that, {'type': 'pick'
-                                    ,'input': input
-                                    ,'target': sel
-                                    ,'value': value
-                                    ,'suggestBox': suggestBox})
+            options.onPick.call(that, {'type': 'pick'
+                                      ,'input': input
+                                      ,'target': sel
+                                      ,'value': value
+                                      ,'suggestBox': suggestBox})
           return false}
         // TODO should return false only for special keys the app uses (up, down, esc)
         }}}
