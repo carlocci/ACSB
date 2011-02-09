@@ -60,7 +60,7 @@ function Autocomplete(input, options) { var suggestBox, timeout, inputValue, tha
       for (p in dataDict)
         if (hasOwnProp.call(dataDict, p) && p.indexOf(value) == 0)
           ret[p] = dataDict[p]}
-    return ret} 
+    return ret}
 
   function updateSuggestBox(dataDict) { var i, fragment, div, p, hasOwnProp
     hasOwnProp = Object.prototype.hasOwnProperty
