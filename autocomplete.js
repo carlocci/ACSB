@@ -178,15 +178,20 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, that
 
 
   input.onkeydown = keysNavigationHandler
-  suggestBox.onclick = singleClickHandler
-  document.body.onkeydown = function(e) {
-    e = e || window.event
-    // 17 is the control key
-    if (e.keyCode == 17) suggestBox.onclick = multipleClicksHandler}
-  document.body.onkeyup = function(e) {
-    e = e || window.event
-    // 17 is the control key
-    if (e.keyCode == 17) suggestBox.onclick = singleClickHandler}
+  if (!multiclickAsDefault) {
+    suggestBox.onclick = singleClickHandler
+    document.body.onkeydown = function(e) {
+      e = e || window.event
+      // 17 is the control key
+      if (e.keyCode == 17) suggestBox.onclick = multipleClicksHandler}
+    document.body.onkeyup = function(e) {
+      e = e || window.event
+      // 17 is the control key
+      if (e.keyCode == 17) suggestBox.onclick = singleClickHandler}}
+  else suggestBox.onclick = multipleClickHandler
+
+  // API
+  that.options = options
 
 }
 
@@ -196,10 +201,11 @@ window.Autocomplete = Autocomplete
 // DEFAULTS
 defaultOptions = {minChars: 3
                  ,updateTimeout: 100
-                 ,fieldSeparator: ", "
                  ,data: {}
                  ,queryURL: undefined
                  ,queryParameters: undefined
+                 ,multiclickAsDefault: false
+                 ,fieldSeparator: ", "
                  ,onPick: function(e) {
                     e.input.value = e.input.value.replace(/(, )?[^, ]*$/, '$1' + e.value + ', ')
                     e.suggestBox.style.display = 'none'}
