@@ -36,7 +36,7 @@ function XHRGet(url, parameters, cb) { var p, req, hasOwnProp
       else throw new Error('Couldn\'t fetch the data from the server')}}
   req.send()}
 
-function Autocomplete(input, options) { var suggestBox, timeout, inputValue, that
+function Autocomplete(input, options) {var suggestBox, timeout, inputValue, that
 
   function loadData(string) {
     if (typeof options.queryURL == "string")
@@ -62,7 +62,7 @@ function Autocomplete(input, options) { var suggestBox, timeout, inputValue, tha
           ret[p] = dataDict[p]}
     return ret}
 
-  function updateSuggestBox(dataDict) { var i, fragment, div, p, hasOwnProp
+  function updateSuggestBox(dataDict) {var i, fragment, div, p, hasOwnProp
     hasOwnProp = Object.prototype.hasOwnProperty
     suggestBox.innerHTML = ''
     suggestBox.style.display = 'none';
@@ -116,8 +116,6 @@ function Autocomplete(input, options) { var suggestBox, timeout, inputValue, tha
                                   ,'target': el
                                   ,'value': value
                                   ,'suggestBox': suggestBox})}}
-
-   }
 
   function keysNavigationHandler(e) {var sel, value
     e = e || window.event
