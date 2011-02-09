@@ -89,6 +89,52 @@ function Autocomplete(input, options) { var suggestBox, timeout, inputValue, tha
     function removeHover(e) {
       this.className = this.className.replace(/ ?\bhover\b ?/g, '')}}
 
+  function singleClickHandler(e) {var t, el, value
+    e = e || window.event
+    t = e.target || e.srcElement
+    if (t.className.indexOf('acsb-element') >= 0) {el = t}
+    else if (t.parentNode.className.indexOf('acsb-element') >= 0) {el = t.parentNode}
+    else return
+    if (typeof options.onPick == 'function')
+      value = el.textContent || el.innerText
+      options.onPick.call(that, {'type': 'pick'
+                                ,'input': input
+                                ,'target': el
+                                ,'value': value
+                                ,'suggestBox': suggestBox})}
+
+  function multipleClicksHandler(e) {}
+
+  function keysNavigationHandler(e) {var sel, value
+    e = e || window.event
+    if (suggestBox.style.display == 'block') {
+      sel = suggestBox.getElementsByClassName('hover')[0]
+      if (!sel) {
+        if (e.keyCode == 40) suggestBox.firstChild.className += ' hover'
+        if (e.keyCode == 38) suggestBox.lastChild.className += ' hover'}
+      // If some suggestion is selected:
+      else {
+        sel.className = sel.className.replace('hover', '')
+        // 40 is the down arrow key
+        if (e.keyCode == 40)
+          if (sel.nextSibling) sel.nextSibling.className += ' hover'
+          else suggestBox.firstChild.className += ' hover'
+        // 38 is the up arrow key
+        if (e.keyCode == 38)
+          if (sel.previousSibling) sel.previousSibling.className += ' hover'
+          else suggestBox.lastChild.className +=' hover'
+        // 13 is the enter key
+        if (e.keyCode == 13) {
+          if (typeof options.onPick == 'function')
+            value = sel.textContent || sel.innerText
+            options.onPick.call(that, {'type': 'pick'
+                                      ,'input': input
+                                      ,'target': sel
+                                      ,'value': value
+                                      ,'suggestBox': suggestBox})
+          return false}
+        // TODO should return false only for special keys the app uses (up, down, esc)
+        }}}
 
   // Constructor
   that = this
@@ -118,47 +164,17 @@ function Autocomplete(input, options) { var suggestBox, timeout, inputValue, tha
                  timeout = setTimeout(function(){loadData(last)}
                                      ,options.updateTimeout)}
 
-  input.onkeydown = function(e) {var sel, value
-    e = e || window.event
-    if (suggestBox.style.display == 'block') {
-      sel = suggestBox.getElementsByClassName('hover')[0]
-      if (!sel) {
-        if (e.keyCode == 40) suggestBox.firstChild.className += ' hover'
-        if (e.keyCode == 38) suggestBox.lastChild.className += ' hover'}
-      // If some suggestion is selected:
-      else {
-        sel.className = sel.className.replace('hover', '')
-        if (e.keyCode == 40)
-          if (sel.nextSibling) sel.nextSibling.className += ' hover'
-          else suggestBox.firstChild.className += ' hover'
-        if (e.keyCode == 38)
-          if (sel.previousSibling) sel.previousSibling.className += ' hover'
-          else suggestBox.lastChild.className +=' hover'
-        if (e.keyCode == 13) {
-          if (typeof options.onPick == 'function')
-            value = sel.textContent || sel.innerText
-            options.onPick.call(that, {'type': 'pick'
-                                      ,'input': input
-                                      ,'target': sel
-                                      ,'value': value
-                                      ,'suggestBox': suggestBox})
-          return false}
-        // TODO should return false only for special keys the app uses (up, down, esc)
-        }}}
 
-  suggestBox.onclick = function(e) {var t, el, value
+  input.onkeydown = keysNavigationHandler
+  suggestBox.onclick = singleClickHandler
+  document.body.onkeydown = function(e) {
     e = e || window.event
-    t = e.target || e.srcElement
-    if (t.className.indexOf('acsb-element') >= 0) {el = t}
-    else if (t.parentNode.className.indexOf('acsb-element') >= 0) {el = t.parentNode}
-    else return
-    if (typeof options.onPick == 'function')
-      value = el.textContent || el.innerText
-      options.onPick.call(that, {'type': 'pick'
-                                ,'input': input
-                                ,'target': el
-                                ,'value': value
-                                ,'suggestBox': suggestBox})}
+    // 17 is the control key
+    if (e.keyCode == 17) suggestBox.onclick = multipleClicksHandler}
+  document.body.onkeyup = function(e) {
+    e = e || window.event
+    // 17 is the control key
+    if (e.keyCode == 17) suggestBox.onclick = singleClickHandler}
 
 }
 
