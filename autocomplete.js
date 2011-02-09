@@ -89,6 +89,26 @@ function Autocomplete(input, options) { var suggestBox, timeout, inputValue, tha
     function removeHover(e) {
       this.className = this.className.replace(/ ?\bhover\b ?/g, '')}}
 
+
+  // Constructor
+  that = this
+  options = extend(defaultOptions, options)
+  suggestBox = document.createElement('div')
+  suggestBox.className = 'acsb'
+  suggestBox.style.display = 'none'
+  suggestBox.style.position = 'absolute'
+  var pos = getPos(input)
+  suggestBox.style.top = pos.y + input.offsetHeight + 'px'
+  suggestBox.style.left = pos.x + 'px'
+  suggestBox.style.width = input.offsetWidth + 'px'
+  document.body.appendChild(suggestBox)
+
+  // IE
+  input.autocomplete = 'off'
+  // Other browsers
+  input.setAttribute('autocomplete', 'off')
+
+  // Events
   input.onkeyup = function(e) {var last
     if (input.value == inputValue) return false
     inputValue = input.value
@@ -126,24 +146,6 @@ function Autocomplete(input, options) { var suggestBox, timeout, inputValue, tha
         // TODO should return false only for special keys the app uses (up, down, esc)
         }}}
 
-  that = this
-  options = extend(defaultOptions, options)
-  suggestBox = document.createElement('div')
-  suggestBox.className = 'acsb'
-  suggestBox.style.display = 'none'
-  suggestBox.style.position = 'absolute'
-  var pos = getPos(input)
-  suggestBox.style.top = pos.y + input.offsetHeight + 'px'
-  suggestBox.style.left = pos.x + 'px'
-  suggestBox.style.width = input.offsetWidth + 'px'
-  document.body.appendChild(suggestBox)
-
-  // IE
-  input.autocomplete = 'off'
-  // Other browsers
-  input.setAttribute('autocomplete', 'off')
-
-  // Events
   suggestBox.onclick = function(e) {var t, el, value
     e = e || window.event
     t = e.target || e.srcElement
