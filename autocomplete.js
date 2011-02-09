@@ -125,9 +125,9 @@ function Autocomplete(input, options) { var suggestBox, timeout, inputValue, tha
   suggestBox.style.position = 'absolute'
   var pos = getPos(input)
   suggestBox.style.top = pos.y + input.offsetHeight + 'px'
-  suggestBox.style.left = pos.x + 'px'
   suggestBox.style.width = input.offsetWidth + 'px'
-  document.body.appendChild(suggestBox)
+  input.parentNode.style.position = 'relative'
+  input.parentNode.appendChild(suggestBox)
 
   // IE
   input.autocomplete = 'off'
