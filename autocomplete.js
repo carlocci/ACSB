@@ -72,13 +72,22 @@ function Autocomplete(input, options) { var suggestBox, timeout, inputValue, tha
         div = document.createElement('div')
         div.className = 'acsb-element'
         div.id = i
+        div.onmouseover = addHover
+        div.onmouseout = removeHover
         p = document.createElement('p')
         p.className = 'acsb-p'
         p.appendChild(document.createTextNode(dataDict[i]))
         div.appendChild(p)
         fragment.appendChild(div)}
     suggestBox.appendChild(fragment)
-    suggestBox.style.display = 'block'}
+    suggestBox.style.display = 'block'
+
+    // Helper functions
+    function addHover() {
+      this.className += ' hover'}
+
+    function removeHover(e) {
+      this.className = this.className.replace(/ ?\bhover\b ?/g, '')}}
 
   input.onkeyup = function(e) {var last
     if (input.value == inputValue) return false
@@ -106,8 +115,8 @@ function Autocomplete(input, options) { var suggestBox, timeout, inputValue, tha
           if (sel.previousSibling) sel.previousSibling.className += ' hover'
           else suggestBox.lastChild.className +=' hover'
         if (e.keyCode == 13) {
-          value = sel.textContent || sel.innerText
           if (typeof options.onPick == 'function')
+            value = sel.textContent || sel.innerText
             options.onPick.call(that, {'type': 'pick'
                                       ,'input': input
                                       ,'target': sel
@@ -133,6 +142,22 @@ function Autocomplete(input, options) { var suggestBox, timeout, inputValue, tha
   input.autocomplete = 'off'
   // Other browsers
   input.setAttribute('autocomplete', 'off')
+
+  // Events
+  suggestBox.onclick = function(e) {var t, el, value
+    e = e || window.event
+    t = e.target || e.srcElement
+    if (t.className.indexOf('acsb-element') >= 0) {el = t}
+    else if (t.parentNode.className.indexOf('acsb-element') >= 0) {el = t.parentNode}
+    else return
+    if (typeof options.onPick == 'function')
+      value = el.textContent || el.innerText
+      options.onPick.call(that, {'type': 'pick'
+                                ,'input': input
+                                ,'target': el
+                                ,'value': value
+                                ,'suggestBox': suggestBox})}
+
 }
 
 // EXPORTS
