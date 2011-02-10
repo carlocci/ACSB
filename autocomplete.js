@@ -39,6 +39,7 @@ function XHRGet(url, parameters, cb) { var p, req, hasOwnProp
 function Autocomplete(input, options) { var suggestBox, timeout, inputValue, that
 
   function loadData(string) {
+    if (typeof options.onFetch == 'function') options.onFetch.call(that, string)
     if (typeof options.queryURL == "string")
       // Fetch data from an xhr
       XHRGet(options.queryURL
@@ -145,6 +146,7 @@ defaultOptions = {minChars: 3
                  ,data: {}
                  ,queryURL: undefined
                  ,queryParameters: undefined
+                 ,onFetch: undefined
                  ,onPick: function(e) {
                     e.input.value = e.input.value.replace(/(, )?[^, ]*$/, '$1' + e.value + ', ')
                     e.suggestBox.style.display = 'none'}
