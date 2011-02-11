@@ -8,6 +8,11 @@ function removeEvent(el, ev, cb) {
   if (el.removeEventListener) el.removeEventListener(ev, cb, false)
   else if (el.detachEvent) el.detachEvent('on' + ev, cb)}
 
+function getStyle(el, p) {var r
+  if (window.getComputedStyle) r = getComputedStyle(el,null).getPropertyValue(p);
+  else                         r = el.currentStyle[p]
+  return r}
+
 function extend() { var hasOwnProp, p, i, l, r
   hasOwnProp = Object.prototype.hasOwnProperty
   r = {}
@@ -79,7 +84,6 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, that
     hasOwnProp = Object.prototype.hasOwnProperty
     n = 0
     suggestBox.innerHTML = ''
-    that.showSuggestBox(false)
     fragment = document.createDocumentFragment()
     for (i in dataDict)
       if (hasOwnProp.call(dataDict, i)) {
@@ -98,7 +102,10 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, that
     // If there is at least one element, i is not undefin...NOT!
     // GODDAMN YOU, PROTOTYPE!
     //if (i !== undefined) that.showSuggestBox(true)
-    if (n > 0) that.showSuggestBox(true)
+    if (n > 0 && getStyle(suggestBox, 'display') == 'none')
+      that.showSuggestBox(true)
+    else if (n === 0 && getStyle(suggestBox, 'display') == 'block')
+      that.showSuggestBox(false)
 
     // Helper functions
     function addHover() {
@@ -138,12 +145,12 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, that
   function keysNavigationHandler(e) {var sel, value
     e = e || window.event
     // If the suggestBox is not shown
-    if (suggestBox.style.display == 'none') {
+    if (getStyle(suggestBox, 'display') == 'none') {
       if (e.keyCode == 40) {
         that.showSuggestBox(true)
         if (suggestBox.firstChild) suggestBox.firstChild.className += ' hover'}}
     // If the suggestBox is shown
-    else if (suggestBox.style.display == 'block') {
+    else if (getStyle(suggestBox, 'display') == 'block') {
       if (e.keyCode == 27) // esc
       that.showSuggestBox(false)
       sel = suggestBox.getElementsByClassName('hover')[0]
@@ -183,6 +190,7 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, that
   suggestBox.className = 'acsb'
   suggestBox.style.display = 'none'
   suggestBox.style.position = 'absolute'
+  suggestBox.style.zIndex = 999
   suggestBox.style.width = input.offsetWidth + 'px'
   input.parentNode.appendChild(suggestBox)
 
@@ -193,6 +201,9 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, that
 
   // Events
   input.onkeyup = function(e) {var last
+    if (input.value.length < options.minChars) {
+      that.showSuggestBox(false)
+      if (timeout) window.clearTimeout(timeout)}
     if (input.value == inputValue) return false
     inputValue = input.value
     last = inputValue.split(options.fieldSeparator).pop()
@@ -205,13 +216,13 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, that
 
   if (!options.multiclickAsDefault) {
     suggestBox.onclick = singleClickHandler
-    document.body.onkeydown = function(e) {
+  /*  document.body.onkeydown = function(e) {
       e = e || window.event
       // 17 is the control key
       if (e.keyCode == 17) suggestBox.onclick = multipleClicksHandler}
     document.body.onkeyup = function(e) {
       e = e || window.event
-      if (e.keyCode == 17) suggestBox.onclick = singleClickHandler}}
+      if (e.keyCode == 17) suggestBox.onclick = singleClickHandler}*/}
   else suggestBox.onclick = multipleClickHandler
 
   // API
@@ -220,15 +231,12 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, that
   that.showSuggestBox = (function() {
       function handler(e) {
         e = e || window.event
-        if (e.keyCode == 27) that.showSuggestBox(false)}
+        if (e.keyCode == 27) that.showSuggestBox(false)} // 27 is esc
 
       return function(bool) {
-        if (bool) {
-          suggestBox.style.display = 'block'
-          addEvent(window, 'keydown', handler, false)}
-        else {
-          suggestBox.style.display = 'none'
-          removeEvent(window, 'keydown', handler)}}})()
+        options.showHide.call(suggestBox, bool)
+        if (bool)    addEvent(window, 'keydown', handler)
+        else      removeEvent(window, 'keydown', handler)}})()
 }
 
 // EXPORTS
@@ -245,5 +253,8 @@ defaultOptions = {minChars: 3
                  ,fieldSeparator: ", "
                  ,onPick: function(e) {
                     e.input.value = e.input.value.replace(/(, )?[^, ]*$/, '$1' + e.value + ', ')
-                    that.showSuggestBox(false)}}
+                    that.showSuggestBox(false)}
+                 ,showHide: function(bool) {
+                    if (bool) this.style.display = 'block'
+                    else      this.style.display = 'none'}}
 })(this)
