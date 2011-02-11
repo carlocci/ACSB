@@ -183,7 +183,6 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, that
   suggestBox.className = 'acsb'
   suggestBox.style.display = 'none'
   suggestBox.style.position = 'absolute'
-  var pos = getPos(input)
   suggestBox.style.width = input.offsetWidth + 'px'
   input.parentNode.appendChild(suggestBox)
 
