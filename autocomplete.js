@@ -1,5 +1,13 @@
 (function(window, undefined) {
 
+function addEvent(el, ev, cb) {
+  if (el.addEventListener) el.addEventListener(ev, cb, false)
+  else if (el.attachEvent) el.attachEvent('on' + ev, cb)}
+
+function removeEvent(el, ev, cb) {
+  if (el.removeEventListener) el.removeEventListener(ev, cb, false)
+  else if (el.detachEvent) el.detachEvent('on' + ev, cb)}
+
 function extend() { var hasOwnProp, p, i, l, r
   hasOwnProp = Object.prototype.hasOwnProperty
   r = {}
@@ -8,6 +16,9 @@ function extend() { var hasOwnProp, p, i, l, r
       if (hasOwnProp.call(arguments[i], p))
         r[p] = arguments[i][p]
   return r}
+
+function contains(a, b) {
+  return a.contains ? a != b && a.contains(b) : !!(a.compareDocumentPosition(b) & 16)}
 
 function getPos(el) { var x, y
   x = 0, y = 0
@@ -39,13 +50,14 @@ function XHRGet(url, parameters, cb) { var p, req, hasOwnProp
 function Autocomplete(input, options) {var suggestBox, timeout, inputValue, that
 
   function loadData(string) {
-    if (typeof options.onFetch == 'function') options.onFetch.call(that, string)
+    if (typeof options.onFetch == 'function')
+      if (options.onFetch.call(that, string) === false) return false
     if (typeof options.queryURL == "string")
       // Fetch data from an xhr
       XHRGet(options.queryURL
             ,extend(options.queryParameters, {'value': string})
             ,function(e) {try {updateSuggestBox(JSON.parse(e.responseText))}
-                          catch (error) {alert('Il server ha risposto in modo inaspettato\n' + e.responseText)}})
+                          catch (error) {alert('Il server ha risposto in modo inaspettato\n' + error + '\n' + e.responseText)}})
     else if (typeof options.data == "object")
       // Fetch data from the provided object
       updateSuggestBox(filterDataSet(options.data, string))}
@@ -63,13 +75,15 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, that
           ret[p] = dataDict[p]}
     return ret}
 
-  function updateSuggestBox(dataDict) {var i, fragment, div, p, hasOwnProp
+  function updateSuggestBox(dataDict) {var i, fragment, div, p, hasOwnProp, n
     hasOwnProp = Object.prototype.hasOwnProperty
+    n = 0
     suggestBox.innerHTML = ''
-    suggestBox.style.display = 'none';
+    that.showSuggestBox(false)
     fragment = document.createDocumentFragment()
     for (i in dataDict)
       if (hasOwnProp.call(dataDict, i)) {
+        ++n
         div = document.createElement('div')
         div.className = 'acsb-element'
         div.id = i
@@ -81,7 +95,10 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, that
         div.appendChild(p)
         fragment.appendChild(div)}
     suggestBox.appendChild(fragment)
-    suggestBox.style.display = 'block'
+    // If there is at least one element, i is not undefin...NOT!
+    // GODDAMN YOU, PROTOTYPE!
+    //if (i !== undefined) that.showSuggestBox(true)
+    if (n > 0) that.showSuggestBox(true)
 
     // Helper functions
     function addHover() {
@@ -120,24 +137,34 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, that
 
   function keysNavigationHandler(e) {var sel, value
     e = e || window.event
-    if (suggestBox.style.display == 'block') {
+    // If the suggestBox is not shown
+    if (suggestBox.style.display == 'none') {
+      if (e.keyCode == 40) {
+        that.showSuggestBox(true)
+        if (suggestBox.firstChild) suggestBox.firstChild.className += ' hover'}}
+    // If the suggestBox is shown
+    else if (suggestBox.style.display == 'block') {
+      if (e.keyCode == 27) // esc
+      that.showSuggestBox(false)
       sel = suggestBox.getElementsByClassName('hover')[0]
+      // If there is no selection:
       if (!sel) {
         if (e.keyCode == 40) suggestBox.firstChild.className += ' hover'
         if (e.keyCode == 38) suggestBox.lastChild.className += ' hover'}
       // If some suggestion is selected:
       else {
         sel.className = sel.className.replace('hover', '')
-        // 40 is the down arrow key
-        if (e.keyCode == 40)
-          if (sel.nextSibling) sel.nextSibling.className += ' hover'
-          else suggestBox.firstChild.className += ' hover'
-        // 38 is the up arrow key
-        if (e.keyCode == 38)
-          if (sel.previousSibling) sel.previousSibling.className += ' hover'
-          else suggestBox.lastChild.className +=' hover'
-        // 13 is the enter key
-        if (e.keyCode == 13) {
+        if (e.keyCode == 40) // down arrow
+          if (sel.nextSibling) {
+            sel.nextSibling.className += ' hover'}
+          else {
+            suggestBox.firstChild.className += ' hover'}
+        if (e.keyCode == 38) // up arrow
+          if (sel.previousSibling) {
+            sel.previousSibling.className += ' hover'}
+          else {
+            suggestBox.lastChild.className +=' hover'}
+        if (e.keyCode == 13) { // enter
           if (typeof options.onPick == 'function')
             value = sel.textContent || sel.innerText
             options.onPick.call(that, {'type': 'pick'
@@ -157,9 +184,7 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, that
   suggestBox.style.display = 'none'
   suggestBox.style.position = 'absolute'
   var pos = getPos(input)
-  suggestBox.style.top = pos.y + input.offsetHeight + 'px'
   suggestBox.style.width = input.offsetWidth + 'px'
-  input.parentNode.style.position = 'relative'
   input.parentNode.appendChild(suggestBox)
 
   // IE
@@ -177,9 +202,9 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, that
                  timeout = setTimeout(function(){loadData(last)}
                                      ,options.updateTimeout)}
 
-
   input.onkeydown = keysNavigationHandler
-  if (!multiclickAsDefault) {
+
+  if (!options.multiclickAsDefault) {
     suggestBox.onclick = singleClickHandler
     document.body.onkeydown = function(e) {
       e = e || window.event
@@ -187,13 +212,24 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, that
       if (e.keyCode == 17) suggestBox.onclick = multipleClicksHandler}
     document.body.onkeyup = function(e) {
       e = e || window.event
-      // 17 is the control key
       if (e.keyCode == 17) suggestBox.onclick = singleClickHandler}}
   else suggestBox.onclick = multipleClickHandler
 
   // API
   that.options = options
+  that.forceUpdate = function() {loadData(input.value)}
+  that.showSuggestBox = (function() {
+      function handler(e) {
+        e = e || window.event
+        if (e.keyCode == 27) that.showSuggestBox(false)}
 
+      return function(bool) {
+        if (bool) {
+          suggestBox.style.display = 'block'
+          addEvent(window, 'keydown', handler, false)}
+        else {
+          suggestBox.style.display = 'none'
+          removeEvent(window, 'keydown', handler)}}})()
 }
 
 // EXPORTS
@@ -210,5 +246,5 @@ defaultOptions = {minChars: 3
                  ,fieldSeparator: ", "
                  ,onPick: function(e) {
                     e.input.value = e.input.value.replace(/(, )?[^, ]*$/, '$1' + e.value + ', ')
-                    e.suggestBox.style.display = 'none'}}
+                    that.showSuggestBox(false)}}
 })(this)
