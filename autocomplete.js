@@ -50,19 +50,25 @@ function XHRGet(url, parameters, cb) { var p, req, hasOwnProp
         cb(req)
       }
       else throw new Error('Couldn\'t fetch the data from the server')}}
-  req.send()}
+  req.send()
+  return req}
 
-function Autocomplete(input, options) {var suggestBox, timeout, inputValue, that
+function Autocomplete(input, options) {var suggestBox, timeout, inputValue, xhr, that
 
   function loadData(string) {
     if (typeof options.onFetch == 'function')
       if (options.onFetch.call(that, string) === false) return false
     if (typeof options.queryURL == "string")
       // Fetch data from an xhr
-      XHRGet(options.queryURL
-            ,extend(options.queryParameters, {'value': string})
-            ,function(e) {try {updateSuggestBox(JSON.parse(e.responseText))}
-                          catch (error) {alert('Il server ha risposto in modo inaspettato\n' + error + '\n' + e.responseText)}})
+      xhr = XHRGet(options.queryURL
+                  ,extend(options.queryParameters, {'value': string})
+                  ,function(e) {var msg
+                     try {updateSuggestBox(JSON.parse(e.responseText))}
+                     catch (error) {
+                       if (error.name == 'SyntaxError')
+                         alert('Il server ha risposto in modo inaspettato\n\n'
+                               + e.responseText)
+                       else throw error}})
     else if (typeof options.data == "object")
       // Fetch data from the provided object
       updateSuggestBox(filterDataSet(options.data, string))}
@@ -81,6 +87,10 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, that
     return ret}
 
   function updateSuggestBox(dataDict) {var i, fragment, div, p, hasOwnProp, n
+    // this is to catch the case where the user delete every character and we
+    // don't manage to catch it in time to stop the xhr callback from firing
+    // It's the wrong way to do it (see input.onkeyup handler)
+    if (input.value.length < options.minChars) return
     hasOwnProp = Object.prototype.hasOwnProperty
     n = 0
     suggestBox.innerHTML = ''
@@ -100,7 +110,7 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, that
         fragment.appendChild(div)}
     suggestBox.appendChild(fragment)
     // If there is at least one element, i is not undefin...NOT!
-    // GODDAMN YOU, PROTOTYPE!
+    // GODDAMN YOU, PROTOTYPE! ROT IN HELL FFS
     //if (i !== undefined) that.showSuggestBox(true)
     if (n > 0 && getStyle(suggestBox, 'display') == 'none')
       that.showSuggestBox(true)
@@ -201,9 +211,16 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, that
 
   // Events
   input.onkeyup = function(e) {var last
+    // TODO investigate some time
     if (input.value.length < options.minChars) {
       that.showSuggestBox(false)
-      if (timeout) window.clearTimeout(timeout)}
+      if (timeout) window.clearTimeout(timeout)
+      // This raises some error, but it would be the right way to do it
+      // See the updateSuggestBox function for the "temporary" fix
+      /*if (xhr)     {xhr.onreadystatechange = null
+                    xhr.abort()
+                    xhr = undefined}*/
+    }
     if (input.value == inputValue) return false
     inputValue = input.value
     last = inputValue.split(options.fieldSeparator).pop()
