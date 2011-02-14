@@ -138,19 +138,7 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, xhr,
                                 ,'value': value
                                 ,'suggestBox': suggestBox})}}
 
-  function multipleClicksHandler(e) {var t, value, el
-    e = e || window.event
-    t = e.target || e.srcElement
-    if (t.className.indexOf('acsb-element') >= 0) {el = t}
-    else if (t.parentNode.className.indexOf('acsb-element') >= 0) {el = t.parentNode}
-    else return
-      if (typeof options.onPick == 'function') {
-        value = el.textContent || el.innerText
-        options.onPick.call(that, {'type': 'pick'
-                                  ,'input': input
-                                  ,'target': el
-                                  ,'value': value
-                                  ,'suggestBox': suggestBox})}}
+  var multipleClicksHandler = singleClickHandler
 
   function keysNavigationHandler(e) {var sel, value
     e = e || window.event
