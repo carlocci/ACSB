@@ -258,7 +258,7 @@ defaultOptions = {minChars: 3
                  ,fieldSeparator: ", "
                  ,onPick: function(e) {
                     e.input.value = e.input.value.replace(/(, )?[^, ]*$/, '$1' + e.value + ', ')
-                    that.showSuggestBox(false)}
+                    this.showSuggestBox(false)}
                  ,showHide: function(bool) {
                     if (bool) this.style.display = 'block'
                     else      this.style.display = 'none'}}
