@@ -124,6 +124,19 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, xhr,
     function removeHover(e) {
       this.className = this.className.replace(/ ?\bhover\b ?/g, '')}}
 
+  //TODO Should auto decide whether scrolling to the top or bottom if top is
+  //     not passed to the function
+  function bringIntoView(el, container, top) {var scroll, a
+    a = isVisible(el, container)
+    if (!a) {
+      if (top) scroll = el.offsetTop
+      else     scroll = el.offsetTop - container.offsetHeight + el.offsetHeight
+      container.scrollTop = scroll}
+
+    function isVisible(el, co) {
+      return co.scrollTop + co.offsetHeight > el.offsetTop
+          && co.scrollTop < el.offsetTop}}
+
   function singleClickHandler(e) {var t, el, value
     e = e || window.event
     t = e.target || e.srcElement
@@ -161,14 +174,18 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, xhr,
         sel.className = sel.className.replace('hover', '')
         if (e.keyCode == 40) // down arrow
           if (sel.nextSibling) {
-            sel.nextSibling.className += ' hover'}
+            sel.nextSibling.className += ' hover'
+            bringIntoView(sel.nextSibling, suggestBox, false)}
           else {
-            suggestBox.firstChild.className += ' hover'}
+            suggestBox.firstChild.className += ' hover'
+            bringIntoView(suggestBox.firstChild, suggestBox, true)}
         if (e.keyCode == 38) // up arrow
           if (sel.previousSibling) {
-            sel.previousSibling.className += ' hover'}
+            sel.previousSibling.className += ' hover'
+            bringIntoView(sel.previousSibling, suggestBox, true)}
           else {
-            suggestBox.lastChild.className +=' hover'}
+            suggestBox.lastChild.className +=' hover'
+            bringIntoView(sel.lastChild, suggestBox, false)}
         if (e.keyCode == 13) { // enter
           if (typeof options.onPick == 'function')
             value = sel.textContent || sel.innerText
