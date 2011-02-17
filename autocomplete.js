@@ -86,7 +86,7 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, xhr,
           ret[p] = dataDict[p]}
     return ret}
 
-  function updateSuggestBox(dataDict) {var i, fragment, div, p, hasOwnProp, n
+  function updateSuggestBox(dataDict) {var i, fragment, div, hasOwnProp, n
     // this is to catch the case where the user delete every character and we
     // don't manage to catch it in time to stop the xhr callback from firing
     // It's the wrong way to do it (see input.onkeyup handler)
@@ -98,15 +98,9 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, xhr,
     for (i in dataDict)
       if (hasOwnProp.call(dataDict, i)) {
         ++n
-        div = document.createElement('div')
-        div.className = 'acsb-element'
-        div.id = i
-        div.onmouseover = addHover
-        div.onmouseout = removeHover
-        p = document.createElement('p')
-        p.className = 'acsb-p'
-        p.appendChild(document.createTextNode(dataDict[i]))
-        div.appendChild(p)
+        div = that.options.processJSON.call(dataDict[i], i)
+        if (typeof that.options.suggestionExtender == 'function')
+          div = that.options.suggestionExtender(div)
         fragment.appendChild(div)}
     suggestBox.appendChild(fragment)
     // If there is at least one element, i is not undefin...NOT!
@@ -265,18 +259,38 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, xhr,
 window.Autocomplete = Autocomplete
 
 // DEFAULTS
-defaultOptions = {minChars: 3
-                 ,updateTimeout: 100
-                 ,data: {}
-                 ,queryURL: undefined
-                 ,queryParameters: undefined
-                 ,onFetch: undefined
-                 ,multiclickAsDefault: false
-                 ,fieldSeparator: ", "
-                 ,onPick: function(e) {
-                    e.input.value = e.input.value.replace(/(, )?[^, ]*$/, '$1' + e.value + ', ')
-                    this.showSuggestBox(false)}
-                 ,showHide: function(bool) {
-                    if (bool) this.style.display = 'block'
-                    else      this.style.display = 'none'}}
+defaultOptions = 
+   {minChars: 3
+   ,updateTimeout: 100
+   ,data: {}
+   ,queryURL: undefined
+   ,queryParameters: undefined
+   ,onFetch: undefined
+   ,multiclickAsDefault: false
+   ,fieldSeparator: ", "
+   ,onPick: function(e) {
+      e.input.value = e.input.value.replace(/(, )?[^, ]*$/, '$1' + e.value + ', ')
+      this.showSuggestBox(false)}
+   ,showHide: function(bool) {
+      if (bool) this.style.display = 'block'
+      else      this.style.display = 'none'}
+   ,processJSON: function(i) {var div, p
+      div = document.createElement('div')
+      div.className = 'acsb-element'
+      div.id = i
+      div.onmouseover = addHover
+      div.onmouseout = removeHover
+      p = document.createElement('p')
+      p.className = 'acsb-p'
+      p.appendChild(document.createTextNode(this))
+      div.appendChild(p)
+      return div
+
+      // Helper functions
+      function addHover() {
+        this.className += ' hover'}
+
+      function removeHover(e) {
+        this.className = this.className.replace(/ ?\bhover\b ?/g, '')}}
+   ,suggestionExtender: undefined}
 })(this)
