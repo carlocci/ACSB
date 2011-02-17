@@ -200,7 +200,7 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, xhr,
   suggestBox.style.display = 'none'
   suggestBox.style.position = 'absolute'
   suggestBox.style.zIndex = 999
-  suggestBox.style.width = input.offsetWidth + 'px'
+  if (!options.forceCSSWidth) suggestBox.style.width = input.offsetWidth + 'px'
   input.parentNode.appendChild(suggestBox)
 
   // IE
@@ -267,6 +267,7 @@ defaultOptions =
    ,queryParameters: undefined
    ,onFetch: undefined
    ,multiclickAsDefault: false
+   ,forceCSSWidth: false
    ,fieldSeparator: ", "
    ,onPick: function(e) {
       e.input.value = e.input.value.replace(/(, )?[^, ]*$/, '$1' + e.value + ', ')
