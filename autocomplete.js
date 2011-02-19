@@ -13,7 +13,7 @@ function getStyle(el, p) {var r
   else                         r = el.currentStyle[p]
   return r}
 
-function extend() { var hasOwnProp, p, i, l, r
+function extend() {var hasOwnProp, p, i, l, r
   hasOwnProp = Object.prototype.hasOwnProperty
   r = {}
   for (i = 0, l = arguments.length; i < l; ++i)
@@ -25,7 +25,7 @@ function extend() { var hasOwnProp, p, i, l, r
 function contains(a, b) {
   return a.contains ? a != b && a.contains(b) : !!(a.compareDocumentPosition(b) & 16)}
 
-function getPos(el) { var x, y
+function getPos(el) {var x, y
   x = 0, y = 0
   do {
     x += el.offsetLeft
@@ -33,7 +33,7 @@ function getPos(el) { var x, y
   while (el = el.offsetParent)
   return {x: x, y: y}}
 
-function XHRGet(url, parameters, cb) { var p, req, hasOwnProp
+function XHRGet(url, parameters, cb) {var p, req, hasOwnProp
   hasOwnProp = Object.prototype.hasOwnProperty
   if (window.XMLHttpRequest) req = new XMLHttpRequest()
   else if (window.ActiveXObject) {req = new ActiveXObject('Microsoft.XMLHTTP')}
@@ -143,7 +143,9 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, xhr,
                                 ,'input': input
                                 ,'target': el
                                 ,'value': value
-                                ,'suggestBox': suggestBox})}}
+                                ,'suggestBox': suggestBox})}
+    e.cancelBubble = true
+    if (e.stopPropagation) e.stopPropagation()}
 
   var multipleClicksHandler = singleClickHandler
 
@@ -245,14 +247,20 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, xhr,
   that.options = options
   that.forceUpdate = function() {loadData(input.value)}
   that.showSuggestBox = (function() {
-      function handler(e) {
+      function keyHandler(e) {
         e = e || window.event
         if (e.keyCode == 27) that.showSuggestBox(false)} // 27 is esc
 
+      function clickHandler(e) {
+        e = e || window.event
+        that.showSuggestBox(false)}
+
       return function(bool) {
         options.showHide.call(suggestBox, bool)
-        if (bool)    addEvent(window, 'keydown', handler)
-        else      removeEvent(window, 'keydown', handler)}})()
+        if (bool) { addEvent(window, 'keydown', keyHandler)
+                    addEvent(window, 'click', clickHandler)}
+        else      { removeEvent(window, 'keydown', keyHandler)
+                    removeEvent(window, 'click', clickHandler)}}})()
 }
 
 // EXPORTS
