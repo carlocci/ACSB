@@ -120,9 +120,8 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, xhr,
 
   //TODO Should auto decide whether scrolling to the top or bottom if top is
   //     not passed to the function
-  function bringIntoView(el, container, top) {var scroll, a
-    a = isVisible(el, container)
-    if (!a) {
+  function bringIntoView(el, container, top) {var scroll
+    if(!isVisible(el, container)) {
       if (top) scroll = el.offsetTop
       else     scroll = el.offsetTop - container.offsetHeight + el.offsetHeight
       container.scrollTop = scroll}
