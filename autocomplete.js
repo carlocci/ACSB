@@ -159,7 +159,7 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, xhr,
     else if (getStyle(suggestBox, 'display') == 'block') {
       if (e.keyCode == 27) // esc
       that.showSuggestBox(false)
-      sel = suggestBox.getElementsByClassName('hover')[0]
+      sel = getSelected(suggestBox)
       // If there is no selection:
       if (!sel) {
         if (e.keyCode == 40) suggestBox.firstChild.className += ' hover'
@@ -189,9 +189,12 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, xhr,
                                       ,'target': sel
                                       ,'value': value
                                       ,'suggestBox': suggestBox})
-          return false}
-        // TODO should return false only for special keys the app uses (up, down, esc)
-        }}}
+          return false}}}
+  
+  function getSelected(el) {
+    for (i = 0, l = el.childNodes.length; i < l; ++i)
+      if (/\bhover\b/.exec(el.childNodes[i].className))
+        return el.childNodes[i]}}
 
   // Constructor
   that = this
