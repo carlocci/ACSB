@@ -118,16 +118,17 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, xhr,
     function removeHover(e) {
       this.className = this.className.replace(/ ?\bhover\b ?/g, '')}}
 
-  //TODO Should auto decide whether scrolling to the top or bottom if top is
-  //     not passed to the function
   function bringIntoView(el, container, top) {var scroll
     if(!isVisible(el, container)) {
+      if (top === undefined) {
+        if (el.offsetTop < container.scrollTop) top = true
+        else                                    top = false}
       if (top) scroll = el.offsetTop
       else     scroll = el.offsetTop - container.offsetHeight + el.offsetHeight
       container.scrollTop = scroll}
 
     function isVisible(el, co) {
-      return co.scrollTop + co.offsetHeight > el.offsetTop
+      return co.scrollTop + co.offsetHeight > el.offsetTop + el.offsetHeight
           && co.scrollTop < el.offsetTop}}
 
   function singleClickHandler(e) {var t, el, value
@@ -154,33 +155,24 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, xhr,
     if (getStyle(suggestBox, 'display') == 'none') {
       if (e.keyCode == 40) {
         that.showSuggestBox(true)
-        if (suggestBox.firstChild) suggestBox.firstChild.className += ' hover'}}
+        if (suggestBox.firstChild) select(suggestBox.firstChild)}}
     // If the suggestBox is shown
     else if (getStyle(suggestBox, 'display') == 'block') {
-      if (e.keyCode == 27) // esc
-      that.showSuggestBox(false)
+      if (e.keyCode == 27) that.showSuggestBox(false)
       sel = getSelected(suggestBox)
       // If there is no selection:
       if (!sel) {
-        if (e.keyCode == 40) suggestBox.firstChild.className += ' hover'
-        if (e.keyCode == 38) suggestBox.lastChild.className += ' hover'}
+        if (e.keyCode == 40) select(suggestBox.firstChild)
+        if (e.keyCode == 38) select(suggestBox.lastChild)}
       // If some suggestion is selected:
       else {
         sel.className = sel.className.replace('hover', '')
         if (e.keyCode == 40) // down arrow
-          if (sel.nextSibling) {
-            sel.nextSibling.className += ' hover'
-            bringIntoView(sel.nextSibling, suggestBox, false)}
-          else {
-            suggestBox.firstChild.className += ' hover'
-            bringIntoView(suggestBox.firstChild, suggestBox, true)}
+          if (sel.nextSibling) select(sel.nextSibling)
+          else                 select(suggestBox.firstChild)
         if (e.keyCode == 38) // up arrow
-          if (sel.previousSibling) {
-            sel.previousSibling.className += ' hover'
-            bringIntoView(sel.previousSibling, suggestBox, true)}
-          else {
-            suggestBox.lastChild.className +=' hover'
-            bringIntoView(sel.lastChild, suggestBox, false)}
+          if (sel.previousSibling) select(sel.previousSibling)
+          else                     select(suggestBox.lastChild)
         if (e.keyCode == 13) { // enter
           if (typeof options.onPick == 'function')
             value = sel.textContent || sel.innerText
@@ -190,11 +182,15 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, xhr,
                                       ,'value': value
                                       ,'suggestBox': suggestBox})
           return false}}}
-  
+
   function getSelected(el) {
     for (i = 0, l = el.childNodes.length; i < l; ++i)
       if (/\bhover\b/.exec(el.childNodes[i].className))
-        return el.childNodes[i]}}
+        return el.childNodes[i]}
+  
+  function select(el, show) {
+    el.className = ' hover'
+    bringIntoView(el, suggestBox)}}
 
   // Constructor
   that = this
