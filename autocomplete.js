@@ -276,7 +276,7 @@ defaultOptions =
    ,forceCSSWidth: false
    ,fieldSeparator: ", "
    ,onPick: function(e) {
-      e.input.value = e.input.value.replace(/(, )?[^, ]*$/, '$1' + e.value + ', ')
+      e.input.value = e.input.value.replace(/(, )?[^,]*$/, '$1' + e.value + ', ')
       this.showSuggestBox(false)}
    ,showHide: function(bool) {
       if (bool) this.style.display = 'block'
