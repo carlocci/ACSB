@@ -195,11 +195,13 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, xhr,
   // Constructor
   that = this
   options = extend(defaultOptions, options)
-  suggestBox = document.createElement('div')
-  suggestBox.className = 'acsb'
-  suggestBox.style.display = 'none'
-  suggestBox.style.position = 'absolute'
-  suggestBox.style.zIndex = 999
+  if (!options.suggestBox) {
+    suggestBox = document.createElement('div')
+    suggestBox.className = 'acsb'
+    suggestBox.style.display = 'none'
+    suggestBox.style.position = 'absolute'
+    suggestBox.style.zIndex = 999}
+  else suggestBox = options.suggestBox
   if (!options.forceCSSWidth) suggestBox.style.width = input.offsetWidth + 'px'
   input.parentNode.appendChild(suggestBox)
 
