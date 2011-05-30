@@ -93,7 +93,7 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, xhr,
     if (input.value.length < options.minChars) return
     hasOwnProp = Object.prototype.hasOwnProperty
     n = 0
-    suggestBox.innerHTML = ''
+    options.clearSuggestBox.call(that, suggestBox)
     fragment = document.createDocumentFragment()
     for (i in dataDict)
       if (hasOwnProp.call(dataDict, i)) {
@@ -101,7 +101,7 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, xhr,
         div = that.options.processJSON.call(dataDict[i], i)
         if (typeof that.options.suggestionExtender == 'function')
           div = that.options.suggestionExtender(div)
-        fragment.appendChild(div)}
+        if (div !== null) fragment.appendChild(div)}
     suggestBox.appendChild(fragment)
     // If there is at least one element, i is not undefin...NOT!
     // GODDAMN YOU, PROTOTYPE! ROT IN HELL FFS
@@ -301,5 +301,6 @@ defaultOptions =
 
       function removeHover(e) {
         this.className = this.className.replace(/ ?\bhover\b ?/g, '')}}
-   ,suggestionExtender: undefined}
+   ,suggestionExtender: undefined
+   ,clearSuggestBox: function(suggestBox) {suggestBox.innerHTML = ''}}
 })(this)
