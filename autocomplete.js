@@ -90,7 +90,7 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, xhr,
     // this is to catch the case where the user delete every character and we
     // don't manage to catch it in time to stop the xhr callback from firing
     // It's the wrong way to do it (see input.onkeyup handler)
-    if (input.value.length < options.minChars) return
+    //if (input.value.length < options.minChars) return
     hasOwnProp = Object.prototype.hasOwnProperty
     n = 0
     options.clearSuggestBox.call(that, suggestBox)
@@ -200,10 +200,10 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, xhr,
     suggestBox.className = 'acsb'
     suggestBox.style.display = 'none'
     suggestBox.style.position = 'absolute'
-    suggestBox.style.zIndex = 999}
+    suggestBox.style.zIndex = 999
+    input.parentNode.appendChild(suggestBox)}
   else suggestBox = options.suggestBox
   if (!options.forceCSSWidth) suggestBox.style.width = input.offsetWidth + 'px'
-  input.parentNode.appendChild(suggestBox)
 
   // IE
   input.autocomplete = 'off'
