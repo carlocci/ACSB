@@ -245,7 +245,7 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, xhr,
 
   // API
   that.options = options
-  that.forceUpdate = function() {loadData(input.value)}
+  that.forceUpdate = function(s) {loadData(arguments.length > 0 ? s : input.value)}
   that.showSuggestBox = (function() {
       function keyHandler(e) {
         e = e || window.event
