@@ -201,6 +201,8 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, xhr,
     suggestBox.style.display = 'none'
     suggestBox.style.position = 'absolute'
     suggestBox.style.zIndex = 999
+    suggestBox.style.left = input.offsetLeft + 'px'
+    suggestBox.style.top = input.offsetTop + input.offsetHeight + 'px'
     input.parentNode.appendChild(suggestBox)}
   else suggestBox = options.suggestBox
   if (!options.forceCSSWidth) suggestBox.style.width = input.offsetWidth + 'px'
