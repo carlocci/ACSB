@@ -205,7 +205,7 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, xhr,
     suggestBox.style.top = input.offsetTop + input.offsetHeight + 'px'
     input.parentNode.appendChild(suggestBox)}
   else suggestBox = options.suggestBox
-  if (!options.forceCSSWidth) suggestBox.style.width = input.offsetWidth + 'px'
+  if (!!options.forceCSSWidth) suggestBox.style.width = input.offsetWidth + 'px'
 
   // IE
   input.autocomplete = 'off'
@@ -231,8 +231,8 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, xhr,
     if (last.length >= options.minChars) 
                  timeout = setTimeout(function(){loadData(last)}
                                      ,options.updateTimeout)}
-
-  input.onkeydown = keysNavigationHandler
+  if(options.keyboard)
+    input.onkeydown = keysNavigationHandler
 
   if (!options.multiclickAsDefault) {
     suggestBox.onclick = singleClickHandler
@@ -277,7 +277,8 @@ defaultOptions =
    ,queryParameters: undefined
    ,onFetch: undefined
    ,multiclickAsDefault: false
-   ,forceCSSWidth: false
+   ,forceCSSWidth: true
+   ,keyboard: true
    ,fieldSeparator: ", "
    ,onPick: function(e) {
       e.input.value = e.input.value.replace(/(, )?[^,]*$/, '$1' + e.value + ', ')
