@@ -62,13 +62,14 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, xhr,
       // Fetch data from an xhr
       xhr = XHRGet(options.queryURL
                   ,extend(options.queryParameters, {'value': string})
-                  ,function(e) {var msg
-                     try {updateSuggestBox(JSON.parse(e.responseText))}
+                  ,function(e) {var jsonResponse
+                     try {jsonResponse = JSON.parse(e.responseText)}
                      catch (error) {
                        if (error.name == 'SyntaxError')
                          alert('Il server ha risposto in modo inaspettato\n\n'
                                + e.responseText)
-                       else throw error}})
+                       else throw error}
+                     updateSuggestBox(jsonResponse)})
     else if (typeof options.data == "object")
       // Fetch data from the provided object
       updateSuggestBox(filterDataSet(options.data, string))}
