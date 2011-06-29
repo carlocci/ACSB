@@ -152,6 +152,10 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, xhr,
 
   function keysNavigationHandler(e) {var sel, value
     e = e || window.event
+    if (e.keyCode == 27) {
+      select(null)
+      that.showSuggestBox(false)
+      return false}
     // If the suggestBox is not shown
     if (getStyle(suggestBox, 'display') == 'none') {
       if (e.keyCode == 40) {
@@ -159,7 +163,6 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, xhr,
         if (suggestBox.firstChild) select(suggestBox.firstChild)}}
     // If the suggestBox is shown
     else if (getStyle(suggestBox, 'display') == 'block') {
-      if (e.keyCode == 27) that.showSuggestBox(false)
       sel = getSelected(suggestBox)
       // If there is no selection:
       if (!sel) {
@@ -187,11 +190,16 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, xhr,
   function getSelected(el) {
     for (i = 0, l = el.childNodes.length; i < l; ++i)
       if (/\bhover\b/.exec(el.childNodes[i].className))
-        return el.childNodes[i]}
+        return el.childNodes[i]
+    return null}
   
   function select(el, show) {
-    el.className = ' hover'
-    bringIntoView(el, suggestBox)}}
+    if (el === null) {
+      el = getSelected(suggestBox)
+      if (el) el.className = el.className.replace('hover', '')} // UGH
+    else if (typeof el === 'object') {
+      el.className = ' hover'
+      bringIntoView(el, suggestBox)}}}
 
   // Constructor
   that = this
