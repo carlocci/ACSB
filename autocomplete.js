@@ -268,10 +268,10 @@ function Autocomplete(input, options) {var suggestBox, timeout, inputValue, xhr,
 
       return function(bool) {
         options.showHide.call(suggestBox, bool)
-        if (bool) { addEvent(window, 'keydown', keyHandler)
-                    addEvent(window, 'click', clickHandler)}
-        else      { removeEvent(window, 'keydown', keyHandler)
-                    removeEvent(window, 'click', clickHandler)}}})()
+        if (bool) { addEvent(document, 'keydown', keyHandler)
+                    addEvent(document, 'click', clickHandler)}
+        else      { removeEvent(document, 'keydown', keyHandler)
+                    removeEvent(document, 'click', clickHandler)}}})()
 }
 
 // EXPORTS
